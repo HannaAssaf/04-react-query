@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Movie } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
 import { Toaster, toast } from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import Loader from "../Loader/Loader";
@@ -10,31 +11,34 @@ import MovieModal from "../MovieModal/MovieModal";
 import "./App.module.css";
 
 function App() {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [searchMovies, setSearchMovies] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<Movie | null>(null);
 
-  const handleSubmit = async (searchTopic: string) => {
-    try {
-      setIsError(false);
-      setIsLoading(true);
-      setMovies([]);
-      const newMovies = await fetchMovies(searchTopic);
-      if (newMovies.length === 0) {
-        toast.error("No movies found for your request.");
-      }
-      setMovies(newMovies);
-    } catch (error) {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
+  const {
+    data: movies = [],
+    isLoading,
+    isError,
+  } = useQuery<Movie[]>({
+    queryKey: ["movies", searchMovies],
+    queryFn: () => fetchMovies(searchMovies),
+    enabled: searchMovies !== "",
+  });
+
+  useEffect(() => {
+    if (!isLoading && !isError && searchMovies && movies.length === 0) {
+      toast.error("No movies found for your request.");
     }
+  }, [isLoading, isError, movies, searchMovies]);
+
+  const handleSubmit = (newSearchMovie: string) => {
+    setSearchMovies(newSearchMovie);
+    // }
   };
 
   const handleSelect = (movie: Movie) => {
     setIsModalOpen(movie);
   };
+
   const handleClose = () => setIsModalOpen(null);
 
   return (
