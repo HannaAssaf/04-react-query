@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Movie, FetchMoviesResp } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
 import { Toaster, toast } from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Pagination from "../Pagination/Pagination";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
@@ -16,10 +16,11 @@ function App() {
   const [searchMovies, setSearchMovies] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery<FetchMoviesResp>({
+  const { data, isLoading, isError, isSuccess } = useQuery<FetchMoviesResp>({
     queryKey: ["movies", searchMovies, page],
     queryFn: () => fetchMovies(searchMovies, page),
     enabled: searchMovies !== "",
+    placeholderData: keepPreviousData,
   });
 
   const movies: Movie[] = data?.results ?? [];
@@ -49,7 +50,7 @@ function App() {
     <>
       <Toaster />
       <SearchBar onSearch={handleSubmit} />
-      {pageCount > 1 && (
+      {isSuccess && (
         <Pagination
           currentPage={page}
           pageCount={pageCount}
