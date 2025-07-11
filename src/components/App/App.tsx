@@ -27,10 +27,6 @@ function App() {
   const pageCount: number = data?.total_pages ?? 0;
 
   useEffect(() => {
-    setPage(1);
-  }, [searchMovies]);
-
-  useEffect(() => {
     if (!isLoading && !isError && searchMovies && movies.length === 0) {
       toast.error("No movies found for your request.");
     }
@@ -38,6 +34,7 @@ function App() {
 
   const handleSubmit = (newSearchMovie: string) => {
     setSearchMovies(newSearchMovie);
+    setPage(1);
   };
 
   const handleSelect = (movie: Movie) => {
