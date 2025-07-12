@@ -2,13 +2,13 @@ import css from "./Pagination.module.css";
 import ReactPaginate from "react-paginate";
 
 interface ReactPaginateProps {
-  currentPage: number;
+  forcePage: number;
   pageCount: number;
   onPageChange: (page: number) => void;
 }
 
 const Pagination: React.FC<ReactPaginateProps> = ({
-  currentPage: page,
+  forcePage: page,
   pageCount: totalPages,
   onPageChange: setPage,
 }) => {

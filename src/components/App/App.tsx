@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Movie, FetchMoviesResp } from "../../types/movie";
+import { Movie } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
 import { Toaster, toast } from "react-hot-toast";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -14,9 +14,9 @@ import "./App.module.css";
 function App() {
   const [page, setPage] = useState<number>(1);
   const [searchMovies, setSearchMovies] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError, isSuccess } = useQuery<FetchMoviesResp>({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["movies", searchMovies, page],
     queryFn: () => fetchMovies(searchMovies, page),
     enabled: searchMovies !== "",
@@ -38,18 +38,18 @@ function App() {
   };
 
   const handleSelect = (movie: Movie) => {
-    setIsModalOpen(movie);
+    setSelectedMovie(movie);
   };
 
-  const handleClose = () => setIsModalOpen(null);
+  const handleClose = () => setSelectedMovie(null);
 
   return (
     <>
       <Toaster />
-      <SearchBar onSearch={handleSubmit} />
+      <SearchBar onSubmit={handleSubmit} />
       {isSuccess && (
         <Pagination
-          currentPage={page}
+          forcePage={page}
           pageCount={pageCount}
           onPageChange={setPage}
         />
@@ -60,7 +60,9 @@ function App() {
         <MovieGrid movies={movies} onSelect={handleSelect} />
       )}
 
-      {isModalOpen && <MovieModal movie={isModalOpen} onClose={handleClose} />}
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleClose} />
+      )}
     </>
   );
 }
